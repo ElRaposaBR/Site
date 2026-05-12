@@ -18,7 +18,7 @@ $url = "https://melhorenvio.com.br/api/v2/me/shipment/calculate";
 
 // JSON MANUAL (IMPORTANTE)
 $json = '{
-  "from": {"postal_code": "01001000"},
+  "from": {"postal_code": "69550073"},
   "to": {"postal_code": "'.$cep.'"},
   "products": [{
     "id": "1",
