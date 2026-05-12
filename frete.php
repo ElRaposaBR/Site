@@ -11,7 +11,7 @@ if (!isset($_GET['cep'])) {
 $cep = preg_replace('/[^0-9]/', '', $_GET['cep']);
 
 // TOKEN
-$token = "jwCIv10ToI31EPyV60LlOprTteGx03jeTcwJzwTQ";
+$token = "7GRJmzWzujuhPygQFwcNe2ENmCG5vlc0kqigv7B9";
 
 // URL CORRETA
 $url = "https://melhorenvio.com.br/api/v2/me/shipment/calculate";
