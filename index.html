@@ -75,7 +75,7 @@
 
   <p>Total: R$ <span id="total">0.00</span></p>
 
-  <!-- FRETE REAL -->
+  <!-- FRETE -->
   <div class="frete">
     <h3>Calcular Frete</h3>
 
@@ -187,7 +187,7 @@ function aumentar(i){ carrinho[i].qtd++; atualizarCarrinho(); }
 function diminuir(i){ carrinho[i].qtd--; if(carrinho[i].qtd<=0) carrinho.splice(i,1); atualizarCarrinho(); }
 function remover(i){ carrinho.splice(i,1); atualizarCarrinho(); }
 
-// FRETE REAL
+// FRETE CORRIGIDO
 function calcularFrete(){
 
   let cep = document.getElementById("cep").value;
@@ -198,21 +198,37 @@ function calcularFrete(){
     return;
   }
 
+  resultado.innerHTML = "Calculando...";
+
   fetch("frete.php?cep=" + cep)
     .then(res => res.json())
     .then(data => {
 
       let html = "";
 
-      data.forEach(opcao => {
+      data.resposta.forEach(opcao => {
+
+        if(opcao.error) return;
+
         html += `
-          <p>
-            ${opcao.name} - R$ ${opcao.price} (${opcao.delivery_time} dias)
-          </p>
+          <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            <strong>🚚 ${opcao.name}</strong><br>
+            Empresa: ${opcao.company.name}<br>
+            💰 R$ ${opcao.price}<br>
+            ⏱ ${opcao.delivery_time} dias
+          </div>
         `;
       });
 
+      if(html === ""){
+        html = "Nenhuma opção disponível";
+      }
+
       resultado.innerHTML = html;
+
+    })
+    .catch(() => {
+      resultado.innerText = "Erro ao calcular frete";
     });
 }
 
