@@ -8,9 +8,8 @@
 <style>
 body { font-family: Arial; background:#f5f5f5; }
 header { background:#111; color:#fff; padding:20px; text-align:center; }
-.card { background:#fff; padding:15px; margin:10px; border-radius:10px; display:inline-block; }
-.botao { background:#00c853; color:#fff; padding:10px; border:none; cursor:pointer; border-radius:6px; }
-.frete-box { border:1px solid #ccc; margin:10px; padding:10px; border-radius:8px; }
+.botao { background:green; color:#fff; padding:10px; cursor:pointer; display:inline-block; margin-top:10px; }
+.card { background:#fff; padding:10px; margin:10px; border-radius:10px; display:inline-block; }
 </style>
 </head>
 
@@ -18,158 +17,106 @@ header { background:#111; color:#fff; padding:20px; text-align:center; }
 
 <header>
 <h1>Minha Loja Geek</h1>
-🛒 Carrinho: <span id="contador">0</span>
+🛒 <span id="contador">0</span>
 </header>
 
-<!-- PRODUTOS -->
 <h2>Produtos</h2>
 
 <div class="card">
-<h3>Boneco Naruto</h3>
-<p>R$ 59.90</p>
-<button class="botao" onclick="comprar('Naruto',59.90)">Comprar</button>
+  <h3>Boneco Naruto</h3>
+  <p>R$ 59.90</p>
+  <button onclick="comprar('Naruto',59.90)">Comprar</button>
 </div>
 
 <div class="card">
-<h3>Goku</h3>
-<p>R$ 89.90</p>
-<button class="botao" onclick="comprar('Goku',89.90)">Comprar</button>
+  <h3>Goku</h3>
+  <p>R$ 89.90</p>
+  <button onclick="comprar('Goku',89.90)">Comprar</button>
 </div>
 
-<!-- CARRINHO -->
+<hr>
+
 <h2>Carrinho</h2>
+
 <ul id="lista"></ul>
-<p>Total: R$ <span id="total">0.00</span></p>
 
-<!-- ENDEREÇO -->
-<h3>Endereço</h3>
-<input id="nome" placeholder="Nome"><br>
-<input id="email" placeholder="Email"><br>
-<input id="rua" placeholder="Rua"><br>
-<input id="cep" placeholder="CEP"><br>
+Total: R$ <span id="total">0</span>
 
-<!-- FRETE -->
-<h3>Frete</h3>
-<button onclick="calcularFrete()">Calcular Frete</button>
-<div id="frete"></div>
+<h3>Dados</h3>
 
-<!-- FINALIZAR -->
-<button class="botao" onclick="finalizar()">Finalizar Compra</button>
+<input id="nome" placeholder="Nome"><br><br>
+<input id="email" placeholder="Email"><br><br>
+<input id="endereco" placeholder="Endereço"><br><br>
 
-<div id="resumo"></div>
+<button class="botao" onclick="finalizar()">💳 Finalizar Compra</button>
 
 <script>
 
+// CARRINHO
 let carrinho = [];
-let freteSelecionado = 0;
 
-// ADICIONAR
 function comprar(nome, preco){
   let item = carrinho.find(i=>i.nome===nome);
+
   if(item) item.qtd++;
   else carrinho.push({nome,preco,qtd:1});
+
   atualizar();
 }
 
-// ATUALIZAR
 function atualizar(){
   let lista = document.getElementById("lista");
   let total = 0;
-  let qtd = 0;
-
-  lista.innerHTML = "";
+  let html = "";
 
   carrinho.forEach(i=>{
-    total += i.preco*i.qtd;
-    qtd += i.qtd;
-    lista.innerHTML += `<li>${i.nome} x${i.qtd}</li>`;
+    total += i.preco * i.qtd;
+    html += `<li>${i.nome} x${i.qtd}</li>`;
   });
 
+  lista.innerHTML = html;
   document.getElementById("total").innerText = total.toFixed(2);
-  document.getElementById("contador").innerText = qtd;
+  document.getElementById("contador").innerText = carrinho.length;
 }
 
-// FRETE
-function calcularFrete(){
-
-  let cep = document.getElementById("cep").value;
-  let div = document.getElementById("frete");
-
-  div.innerHTML = "Calculando...";
-
-  fetch("frete.php?cep="+cep)
-  .then(r=>r.json())
-  .then(data=>{
-
-    let html="";
-
-    data.forEach(opcao=>{
-
-      if(opcao.error) return;
-
-      // só correios
-      if(opcao.company.name !== "Correios") return;
-
-      html += `
-        <div class="frete-box">
-        <b>${opcao.name}</b><br>
-        R$ ${opcao.price} - ${opcao.delivery_time} dias<br>
-        <button onclick="selecionarFrete(${opcao.price})">
-        Selecionar
-        </button>
-        </div>
-      `;
-    });
-
-    div.innerHTML = html || "Nenhum frete";
-  });
-}
-
-// SELECIONAR FRETE
-function selecionarFrete(valor){
-  freteSelecionado = parseFloat(valor);
-  alert("Frete selecionado: R$ "+valor);
-}
-
-// FINALIZAR
+// PAGAMENTO
 function finalizar(){
 
   let nome = document.getElementById("nome").value;
   let email = document.getElementById("email").value;
-  let rua = document.getElementById("rua").value;
+  let endereco = document.getElementById("endereco").value;
 
-  let total = 0;
+  if(!nome || !email || !endereco){
+    alert("Preencha tudo!");
+    return;
+  }
 
-  carrinho.forEach(i=>{
-    total += i.preco*i.qtd;
-  });
+  if(carrinho.length === 0){
+    alert("Carrinho vazio!");
+    return;
+  }
 
-  let totalFinal = total + freteSelecionado;
-
-  let resumo = `
-    <h3>Resumo</h3>
-    Cliente: ${nome}<br>
-    Email: ${email}<br>
-    Endereço: ${rua}<br>
-    Frete: R$ ${freteSelecionado}<br>
-    Total: R$ ${totalFinal}
-  `;
-
-  document.getElementById("resumo").innerHTML = resumo;
-
-  // SALVAR NO BANCO
-  fetch("salvar_pedido.php", {
+  fetch("criar_pagamento.php", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
-      nome:nome,
-      email:email,
-      endereco:rua,
-      total:totalFinal
+      nome: nome,
+      email: email,
+      endereco: endereco,
+      carrinho: carrinho
     })
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    console.log(data);
+
+    if(data.init_point){
+      window.location.href = data.init_point;
+    }else{
+      alert("Erro no pagamento");
+    }
   });
 
-  alert("Pedido enviado!");
 }
 
 </script>
