@@ -1,15 +1,9 @@
 <?php
+session_start();
 
-$host = "sql10.freesqldatabase.com";
-$user = "sql10826736";
-$pass = "mvww2twiVW";
-$db   = "sql10826736";
+$conn = new mysqli("sql10.freesqldatabase.com", "sql10826736", "sql10826736", "sql10826736");
 
-$conn = new mysqli($host, $user, $pass, $db);
-
-// erro
 if ($conn->connect_error) {
-    die("Erro conexão: " . $conn->connect_error);
+  die("Erro conexão");
 }
-
 ?>
