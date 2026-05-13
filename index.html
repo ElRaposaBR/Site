@@ -1,261 +1,175 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minha Loja Geek</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Loja Geek</title>
+
+<style>
+body { font-family: Arial; background:#f5f5f5; }
+header { background:#111; color:#fff; padding:20px; text-align:center; }
+.card { background:#fff; padding:15px; margin:10px; border-radius:10px; display:inline-block; }
+.botao { background:#00c853; color:#fff; padding:10px; border:none; cursor:pointer; border-radius:6px; }
+.frete-box { border:1px solid #ccc; margin:10px; padding:10px; border-radius:8px; }
+</style>
 </head>
+
 <body>
 
 <header>
-  <h1>Minha Loja Geek</h1>
-
-  <nav>
-    <a href="#">Início</a>
-    <a href="#">Produtos</a>
-    <a href="#">Contato</a>
-  </nav>
-
-  <div class="carrinho-topo">
-    🛒 Carrinho: <span id="contador">0</span>
-  </div>
+<h1>Minha Loja Geek</h1>
+🛒 Carrinho: <span id="contador">0</span>
 </header>
 
-<!-- LOGIN -->
-<section class="login-area">
-<h2>Minha Conta</h2>
+<!-- PRODUTOS -->
+<h2>Produtos</h2>
 
-<input type="text" id="nome" placeholder="Seu nome">
-<input type="email" id="email" placeholder="Seu email">
-<input type="password" id="senha" placeholder="Sua senha">
+<div class="card">
+<h3>Boneco Naruto</h3>
+<p>R$ 59.90</p>
+<button class="botao" onclick="comprar('Naruto',59.90)">Comprar</button>
+</div>
 
-<button onclick="cadastrar()">Cadastrar</button>
-<button onclick="entrar()">Entrar</button>
-<button onclick="sair()">Sair</button>
-
-<p id="usuario-logado"></p>
-</section>
-
-<main>
-  <h2>Produtos em Destaque</h2>
-  <p>Confira nossas ofertas</p>
-
-  <section class="produtos">
-
-    <div class="card">
-      <img src="https://via.placeholder.com/200">
-      <h3>Boneco Naruto</h3>
-      <p class="preco">R$ 59,90</p>
-      <a href="#" class="botao" onclick="comprar('Boneco Naruto',59.90)">Comprar</a>
-    </div>
-
-    <div class="card">
-      <img src="https://via.placeholder.com/200">
-      <h3>Action Figure Goku</h3>
-      <p class="preco">R$ 89,90</p>
-      <a href="#" class="botao" onclick="comprar('Action Figure Goku',89.90)">Comprar</a>
-    </div>
-
-    <div class="card">
-      <img src="https://via.placeholder.com/200">
-      <h3>Camisa Anime</h3>
-      <p class="preco">R$ 49,90</p>
-      <a href="#" class="botao" onclick="comprar('Camisa Anime',49.90)">Comprar</a>
-    </div>
-
-  </section>
-</main>
+<div class="card">
+<h3>Goku</h3>
+<p>R$ 89.90</p>
+<button class="botao" onclick="comprar('Goku',89.90)">Comprar</button>
+</div>
 
 <!-- CARRINHO -->
-<section class="painel-carrinho">
-  <h2>Seu Carrinho</h2>
+<h2>Carrinho</h2>
+<ul id="lista"></ul>
+<p>Total: R$ <span id="total">0.00</span></p>
 
-  <ul id="lista-carrinho"></ul>
+<!-- ENDEREÇO -->
+<h3>Endereço</h3>
+<input id="nome" placeholder="Nome"><br>
+<input id="email" placeholder="Email"><br>
+<input id="rua" placeholder="Rua"><br>
+<input id="cep" placeholder="CEP"><br>
 
-  <p>Total: R$ <span id="total">0.00</span></p>
+<!-- FRETE -->
+<h3>Frete</h3>
+<button onclick="calcularFrete()">Calcular Frete</button>
+<div id="frete"></div>
 
-  <!-- FRETE -->
-  <div class="frete">
-    <h3>Calcular Frete</h3>
+<!-- FINALIZAR -->
+<button class="botao" onclick="finalizar()">Finalizar Compra</button>
 
-    <input type="text" id="cep" placeholder="Digite seu CEP">
-
-    <button onclick="calcularFrete()">Calcular</button>
-
-    <div id="resultado-frete"></div>
-
-    <label>
-      <input type="radio" name="entrega" value="entrega" checked>
-      Entrega pelos Correios
-    </label>
-
-    <label>
-      <input type="radio" name="entrega" value="retirada">
-      Retirar na Loja
-    </label>
-  </div>
-
-  <a href="#" class="botao" onclick="finalizarCompra()">Finalizar Compra</a>
-
-  <div id="resumo-pedido"></div>
-</section>
-
-<footer>
-  <p>© 2026 Minha Loja Geek</p>
-</footer>
+<div id="resumo"></div>
 
 <script>
 
-// LOGIN
-let usuario = JSON.parse(localStorage.getItem("usuario")) || null;
+let carrinho = [];
+let freteSelecionado = 0;
 
-function cadastrar(){
-  let nome = document.getElementById("nome").value;
-  let email = document.getElementById("email").value;
-  let senha = document.getElementById("senha").value;
-
-  if(!nome || !email || !senha){
-    alert("Preencha tudo!");
-    return;
-  }
-
-  localStorage.setItem("usuario", JSON.stringify({nome,email,senha}));
-  alert("Cadastrado!");
-}
-
-function entrar(){
-  let email = document.getElementById("email").value;
-  let senha = document.getElementById("senha").value;
-
-  let user = JSON.parse(localStorage.getItem("usuario"));
-
-  if(user && user.email === email && user.senha === senha){
-    document.getElementById("usuario-logado").innerText = "Logado como: " + user.nome;
-  } else {
-    alert("Login inválido");
-  }
-}
-
-function sair(){
-  document.getElementById("usuario-logado").innerText = "";
-}
-
-// CARRINHO
-let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-atualizarCarrinho();
-
-function salvarCarrinho(){
-  localStorage.setItem("carrinho", JSON.stringify(carrinho));
-}
-
+// ADICIONAR
 function comprar(nome, preco){
-  let item = carrinho.find(i => i.nome === nome);
+  let item = carrinho.find(i=>i.nome===nome);
   if(item) item.qtd++;
   else carrinho.push({nome,preco,qtd:1});
-  atualizarCarrinho();
+  atualizar();
 }
 
-function atualizarCarrinho(){
-  let lista = document.getElementById("lista-carrinho");
-  let contador = document.getElementById("contador");
-  let total = document.getElementById("total");
+// ATUALIZAR
+function atualizar(){
+  let lista = document.getElementById("lista");
+  let total = 0;
+  let qtd = 0;
 
   lista.innerHTML = "";
-  let totalGeral = 0;
-  let totalItens = 0;
 
-  carrinho.forEach((item,i)=>{
-    totalGeral += item.preco * item.qtd;
-    totalItens += item.qtd;
-
-    lista.innerHTML += `
-      <li>
-        ${item.nome} - R$ ${item.preco.toFixed(2)} x ${item.qtd}
-        <button onclick="diminuir(${i})">➖</button>
-        <button onclick="aumentar(${i})">➕</button>
-        <button onclick="remover(${i})">🗑</button>
-      </li>`;
+  carrinho.forEach(i=>{
+    total += i.preco*i.qtd;
+    qtd += i.qtd;
+    lista.innerHTML += `<li>${i.nome} x${i.qtd}</li>`;
   });
 
-  contador.innerText = totalItens;
-  total.innerText = totalGeral.toFixed(2);
-  salvarCarrinho();
+  document.getElementById("total").innerText = total.toFixed(2);
+  document.getElementById("contador").innerText = qtd;
 }
 
-function aumentar(i){ carrinho[i].qtd++; atualizarCarrinho(); }
-function diminuir(i){ carrinho[i].qtd--; if(carrinho[i].qtd<=0) carrinho.splice(i,1); atualizarCarrinho(); }
-function remover(i){ carrinho.splice(i,1); atualizarCarrinho(); }
-
-// FRETE CORRIGIDO
+// FRETE
 function calcularFrete(){
 
   let cep = document.getElementById("cep").value;
-  let resultado = document.getElementById("resultado-frete");
+  let div = document.getElementById("frete");
 
-  if(cep.length < 8){
-    resultado.innerText = "Digite um CEP válido";
-    return;
-  }
+  div.innerHTML = "Calculando...";
 
-  resultado.innerHTML = "Calculando...";
+  fetch("frete.php?cep="+cep)
+  .then(r=>r.json())
+  .then(data=>{
 
-  fetch("frete.php?cep=" + cep)
-    .then(res => res.json())
-    .then(data => {
+    let html="";
 
-      let html = "";
+    data.forEach(opcao=>{
 
-      data.resposta.forEach(opcao => {
+      if(opcao.error) return;
 
-        if(opcao.error) return;
+      // só correios
+      if(opcao.company.name !== "Correios") return;
 
-        html += `
-          <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-            <strong>🚚 ${opcao.name}</strong><br>
-            Empresa: ${opcao.company.name}<br>
-            💰 R$ ${opcao.price}<br>
-            ⏱ ${opcao.delivery_time} dias
-          </div>
-        `;
-      });
-
-      if(html === ""){
-        html = "Nenhuma opção disponível";
-      }
-
-      resultado.innerHTML = html;
-
-    })
-    .catch(() => {
-      resultado.innerText = "Erro ao calcular frete";
+      html += `
+        <div class="frete-box">
+        <b>${opcao.name}</b><br>
+        R$ ${opcao.price} - ${opcao.delivery_time} dias<br>
+        <button onclick="selecionarFrete(${opcao.price})">
+        Selecionar
+        </button>
+        </div>
+      `;
     });
+
+    div.innerHTML = html || "Nenhum frete";
+  });
+}
+
+// SELECIONAR FRETE
+function selecionarFrete(valor){
+  freteSelecionado = parseFloat(valor);
+  alert("Frete selecionado: R$ "+valor);
 }
 
 // FINALIZAR
-function finalizarCompra(){
+function finalizar(){
 
-  if(carrinho.length === 0){
-    alert("Carrinho vazio!");
-    return;
-  }
+  let nome = document.getElementById("nome").value;
+  let email = document.getElementById("email").value;
+  let rua = document.getElementById("rua").value;
 
-  let resumo = document.getElementById("resumo-pedido");
-
-  let texto = "<h3>Resumo:</h3>";
   let total = 0;
 
-  carrinho.forEach(item=>{
-    texto += `<p>${item.nome} x${item.qtd}</p>`;
-    total += item.preco * item.qtd;
+  carrinho.forEach(i=>{
+    total += i.preco*i.qtd;
   });
 
-  let tipo = document.querySelector('input[name="entrega"]:checked').value;
+  let totalFinal = total + freteSelecionado;
 
-  texto += `<p>Entrega: ${tipo === 'retirada' ? 'Retirar na Loja' : 'Correios'}</p>`;
-  texto += `<h3>Total: R$ ${total.toFixed(2)}</h3>`;
+  let resumo = `
+    <h3>Resumo</h3>
+    Cliente: ${nome}<br>
+    Email: ${email}<br>
+    Endereço: ${rua}<br>
+    Frete: R$ ${freteSelecionado}<br>
+    Total: R$ ${totalFinal}
+  `;
 
-  resumo.innerHTML = texto;
+  document.getElementById("resumo").innerHTML = resumo;
+
+  // SALVAR NO BANCO
+  fetch("salvar_pedido.php", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      nome:nome,
+      email:email,
+      endereco:rua,
+      total:totalFinal
+    })
+  });
+
+  alert("Pedido enviado!");
 }
 
 </script>
