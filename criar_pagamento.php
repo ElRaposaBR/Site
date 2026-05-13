@@ -2,7 +2,7 @@
 
 include "config.php";
 
-$access_token = "APP_USR-5976581828685437-042918-b60791b47818e7c3c9fdc21ce5e12b0c-3369359340";
+$access_token = "APP_USR-5270068585960318-042918-da723df4fc1d99ce42bc0f6cca62345b-1245082322";
 
 $dados = json_decode(file_get_contents("php://input"), true);
 
@@ -21,7 +21,7 @@ foreach($dados['carrinho'] as $item){
   $total += $item['preco'] * $item['qtd'];
 }
 
-// cria pedido no banco como pendente
+// cria pedido
 $conn->query("
   INSERT INTO pedidos (nome,email,endereco,total,status)
   VALUES (
@@ -35,11 +35,11 @@ $conn->query("
 
 $pedido_id = $conn->insert_id;
 
-// pagamento MP
+// cria pagamento Mercado Pago
 $payment = [
   "items" => $items,
   "external_reference" => $pedido_id,
-  "notification_url" => "https://SEUSITE.com/webhook.php"
+  "notification_url" => "https://SEUSITE.onrender.com/webhook.php"
 ];
 
 $ch = curl_init();
@@ -53,6 +53,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 ]);
 
 $response = curl_exec($ch);
+
 curl_close($ch);
 
 echo $response;
