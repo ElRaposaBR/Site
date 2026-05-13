@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cadastro</title>
+</head>
+
+<body>
+
+<h2>Criar Conta</h2>
+
+<input id="nome" placeholder="Nome"><br>
+<input id="email" placeholder="Email"><br>
+<input id="senha" type="password" placeholder="Senha"><br>
+<input id="cep" placeholder="CEP"><br>
+
+<button onclick="cadastrar()">Cadastrar</button>
+
+<script>
+function cadastrar(){
+
+  let nome = document.getElementById("nome").value;
+  let email = document.getElementById("email").value;
+  let senha = document.getElementById("senha").value;
+  let cep = document.getElementById("cep").value;
+
+  fetch("cadastro.php",{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:`nome=${nome}&email=${email}&senha=${senha}&cep=${cep}`
+  })
+  .then(r=>r.text())
+  .then(res=>{
+    if(res=="ok"){
+      alert("Conta criada!");
+      window.location.href="login.html";
+    }else{
+      alert("Erro");
+    }
+  });
+}
+</script>
+
+</body>
+</html>
