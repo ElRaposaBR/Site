@@ -1,31 +1,40 @@
 <?php
 session_start();
-
-if(!isset($_SESSION['admin'])){
-  header("Location: login.php");
-  exit;
-}
+if(!isset($_SESSION['admin'])) exit("Acesso negado");
 
 include "../config.php";
 
-$sql = "SELECT * FROM pedidos ORDER BY id DESC";
-$result = $conn->query($sql);
+// TOTAL PEDIDOS
+$totalPedidos = $conn->query("SELECT COUNT(*) as total FROM pedidos")->fetch_assoc()['total'];
+
+// PEDIDOS PENDENTES
+$pendentes = $conn->query("SELECT COUNT(*) as total FROM pedidos WHERE status='pendente'")->fetch_assoc()['total'];
+
+// TOTAL VENDIDO
+$totalVendas = $conn->query("SELECT SUM(total) as soma FROM pedidos")->fetch_assoc()['soma'];
 ?>
 
-<h2>Painel Admin</h2>
+<h1>📊 Dashboard</h1>
 
-<a href="logout.php">Sair</a>
+<p>🧾 Pedidos: <?= $totalPedidos ?></p>
+<p>⏳ Pendentes: <?= $pendentes ?></p>
+<p>💰 Total vendido: R$ <?= number_format($totalVendas,2) ?></p>
 
 <hr>
 
+<h2>📦 Pedidos</h2>
+
 <?php
-while($row = $result->fetch_assoc()){
-  echo "<div style='border:1px solid #ccc; padding:10px; margin:10px'>";
-  echo "<b>Cliente:</b> ".$row['nome']."<br>";
-  echo "<b>Email:</b> ".$row['email']."<br>";
-  echo "<b>Endereço:</b> ".$row['endereco']."<br>";
-  echo "<b>Total:</b> R$ ".$row['total']."<br>";
-  echo "<b>Data:</b> ".$row['data']."<br>";
-  echo "</div>";
-}
+$res = $conn->query("SELECT * FROM pedidos ORDER BY id DESC");
+
+while($p = $res->fetch_assoc()){
 ?>
+<div style="border:1px solid #ccc; margin:10px; padding:10px">
+  Cliente: <?= $p['nome'] ?><br>
+  Total: R$ <?= $p['total'] ?><br>
+  Status: <?= $p['status'] ?><br>
+
+  <a href="mudar_status.php?id=<?= $p['id'] ?>&s=aprovado">✅ Pago</a> |
+  <a href="mudar_status.php?id=<?= $p['id'] ?>&s=enviado">📦 Enviado</a>
+</div>
+<?php } ?>
