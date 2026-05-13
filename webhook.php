@@ -11,7 +11,7 @@ if(isset($data['data']['id'])){
 
     $payment_id = $data['data']['id'];
 
-    $access_token = "APP_USR-5270068585960318-042918-da723df4fc1d99ce42bc0f6cca62345b-1245082322";
+    $access_token = "APP_USR-5976581828685437-042918-b60791b47818e7c3c9fdc21ce5e12b0c-3369359340";
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "https://api.mercadopago.com/v1/payments/".$payment_id);
