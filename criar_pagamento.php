@@ -2,7 +2,7 @@
 
 include "config.php";
 
-$access_token = "SEU_ACCESS_TOKEN_AQUI";
+$access_token = "APP_USR-5976581828685437-042918-b60791b47818e7c3c9fdc21ce5e12b0c-3369359340";
 
 $dados = json_decode(file_get_contents("php://input"), true);
 
