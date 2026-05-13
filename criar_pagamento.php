@@ -2,40 +2,38 @@
 
 include "config.php";
 
+// 🔴 SEU TOKEN REAL
 $access_token = "APP_USR-5270068585960318-042918-da723df4fc1d99ce42bc0f6cca62345b-1245082322";
 
 $dados = json_decode(file_get_contents("php://input"), true);
 
-$items = [];
-$total = 0;
+// 🔥 VALOR FIXO PRA TESTE
+$total = 1.00;
 
-foreach($dados['carrinho'] as $item){
-
-  $items[] = [
-    "title" => $item['nome'],
-    "quantity" => $item['qtd'],
+// 🔥 ITEM FIXO (IGNORA CARRINHO)
+$items = [
+  [
+    "title" => "Teste Loja",
+    "quantity" => 1,
     "currency_id" => "BRL",
-    "unit_price" => (float)$item['preco']
-  ];
+    "unit_price" => 1.00
+  ]
+];
 
-  $total += $item['preco'] * $item['qtd'];
-}
-
-// cria pedido
+// 🔥 SALVA NO BANCO
 $conn->query("
-  INSERT INTO pedidos (nome,email,endereco,total,status)
+  INSERT INTO pedidos (nome,email,endereco,total)
   VALUES (
     '".$dados['nome']."',
     '".$dados['email']."',
     '".$dados['endereco']."',
-    '$total',
-    'pendente'
+    '$total'
   )
 ");
 
 $pedido_id = $conn->insert_id;
 
-// cria pagamento Mercado Pago
+// 🔥 CRIA PAGAMENTO
 $payment = [
   "items" => $items,
   "external_reference" => $pedido_id,
