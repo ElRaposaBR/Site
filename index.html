@@ -1,61 +1,150 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minha Loja Geek</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Loja Geek</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: #fff;
+  margin: 0;
+}
+
+header {
+  background: #111827;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+h1 { margin: 0; }
+
+.container {
+  padding: 20px;
+}
+
+.produtos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #1f2937;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.botao {
+  background: #22c55e;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.botao:hover { background: #16a34a; }
+
+.carrinho {
+  margin-top: 30px;
+  background: #1f2937;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+input {
+  padding: 8px;
+  margin: 5px 0;
+  width: 100%;
+}
+
+.frete {
+  margin-top: 15px;
+  background: #111827;
+  padding: 10px;
+  border-radius: 8px;
+}
+</style>
 </head>
+
 <body>
 
 <header>
-  <h1>Minha Loja Geek</h1>
-  🛒 Carrinho: <span id="contador">0</span>
+  <h1>🛒 Minha Loja Geek</h1>
+  <div>Itens: <span id="contador">0</span></div>
 </header>
+
+<div class="container">
 
 <h2>Produtos</h2>
 
-<section>
+<div class="produtos">
 
-  <!-- 🔥 PRODUTO TESTE -->
-  <div>
-    <h3>Produto Teste</h3>
-    <p>R$ 1,00</p>
-    <button onclick="comprar('Produto Teste',1.00)">Comprar</button>
-  </div>
+<!-- 🔥 PRODUTO TESTE -->
+<div class="card">
+  <img src="https://via.placeholder.com/200">
+  <h3>Produto Teste</h3>
+  <p>R$ 1,00</p>
+  <button class="botao" onclick="comprar('Produto Teste',1)">Comprar</button>
+</div>
 
-  <div>
-    <h3>Boneco Naruto</h3>
-    <p>R$ 59,90</p>
-    <button onclick="comprar('Naruto',59.90)">Comprar</button>
-  </div>
+<div class="card">
+  <img src="https://via.placeholder.com/200">
+  <h3>Boneco Naruto</h3>
+  <p>R$ 59,90</p>
+  <button class="botao" onclick="comprar('Naruto',59.90)">Comprar</button>
+</div>
 
-  <div>
-    <h3>Goku</h3>
-    <p>R$ 89,90</p>
-    <button onclick="comprar('Goku',89.90)">Comprar</button>
-  </div>
+<div class="card">
+  <img src="https://via.placeholder.com/200">
+  <h3>Goku</h3>
+  <p>R$ 89,90</p>
+  <button class="botao" onclick="comprar('Goku',89.90)">Comprar</button>
+</div>
 
-</section>
+</div>
 
-<h2>Seus dados</h2>
+<!-- CARRINHO -->
+<div class="carrinho">
 
-<input id="nome" placeholder="Nome"><br>
-<input id="email" placeholder="Email"><br>
-
-<h2>Carrinho</h2>
+<h2>Seu Carrinho</h2>
 
 <ul id="lista"></ul>
+
 <p>Total: R$ <span id="total">0.00</span></p>
 
-<h3>Frete</h3>
+<h3>Seus dados</h3>
+
+<input id="nome" placeholder="Nome">
+<input id="email" placeholder="Email">
+<input id="endereco" placeholder="Endereço">
+
+<div class="frete">
+<h3>Calcular Frete</h3>
 
 <input id="cep" placeholder="CEP">
-<button onclick="calcularFrete()">Calcular</button>
+<button class="botao" onclick="calcularFrete()">Calcular</button>
 
-<div id="frete"></div>
+<div id="resultado-frete"></div>
+</div>
 
 <br>
-<button onclick="finalizar()">💳 Finalizar Compra</button>
+
+<button class="botao" onclick="finalizar()">💳 Finalizar Compra</button>
+
+</div>
+
+</div>
 
 <script>
 
@@ -72,18 +161,31 @@ function atualizar(){
 
   let lista = document.getElementById("lista");
   let total = 0;
+  let qtd = 0;
 
   lista.innerHTML = "";
 
-  carrinho.forEach(item=>{
+  carrinho.forEach((item,i)=>{
     total += item.preco * item.qtd;
-    lista.innerHTML += `<li>${item.nome} x${item.qtd}</li>`;
+    qtd += item.qtd;
+
+    lista.innerHTML += `
+      <li>
+        ${item.nome} x${item.qtd}
+        <button onclick="remover(${i})">❌</button>
+      </li>`;
   });
 
   document.getElementById("total").innerText = total.toFixed(2);
-  document.getElementById("contador").innerText = carrinho.length;
+  document.getElementById("contador").innerText = qtd;
 }
 
+function remover(i){
+  carrinho.splice(i,1);
+  atualizar();
+}
+
+// FRETE
 function calcularFrete(){
 
   let cep = document.getElementById("cep").value;
@@ -95,16 +197,20 @@ function calcularFrete(){
     let html = "";
 
     data.forEach(f=>{
-      if(f.price){
-        html += `<p>${f.name} - R$ ${f.price}</p>`;
+      if(f.price && f.company.name === "Correios"){
+        html += `
+        <p>
+        🚚 ${f.name} - R$ ${f.price} (${f.delivery_time} dias)
+        </p>`;
       }
     });
 
-    document.getElementById("frete").innerHTML = html;
+    document.getElementById("resultado-frete").innerHTML = html;
   });
 
 }
 
+// PAGAMENTO
 function finalizar(){
 
   if(carrinho.length === 0){
@@ -114,7 +220,7 @@ function finalizar(){
 
   let nome = document.getElementById("nome").value;
   let email = document.getElementById("email").value;
-  let endereco = prompt("Digite seu endereço:");
+  let endereco = document.getElementById("endereco").value;
 
   fetch("criar_pagamento.php",{
     method:"POST",
